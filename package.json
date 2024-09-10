@@ -9,14 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@svgr/webpack": "^8.1.0",
+    "axios": "^1.7.7",
+    "mongodb": "^6.8.1",
+    "mongoose": "^8.6.1",
+    "multer": "^1.4.5-lts.1",
+    "next": "14.2.8",
     "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.8"
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "eslint": "^8",
-    "eslint-config-next": "14.2.8"
+    "eslint-config-next": "14.2.8",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1"
   }
 }
