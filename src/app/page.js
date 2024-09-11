@@ -41,6 +41,14 @@ const Page = () => {
     );
   };
 
+  const handleFilter = (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const filtered = challenges.filter((challenge) =>
+      challenge.name.toLowerCase().includes(searchTerm)
+    );
+    setFilteredChallenges(filtered);
+  };
+
   useEffect(() => {
     let filtered = challenges;
 
@@ -243,19 +251,21 @@ const Page = () => {
               type="text"
               className="w-full block border-collapse border-2 border-slate-300 bg-white rounded-lg p-5 pl-10"
               placeholder="Search"
+              name="filter"
+              onChange={handleFilter}
             />
           </div>
           <div className="relative">
             <button
-              className="w-full border-collapse border-2 border-slate-300 rounded-lg p-5 bg-white flex items-center justify-between"
+              className="w-full border-collapse border-2 border-slate-300 rounded-lg p-5  bg-white flex items-center "
               onClick={toggleFilters}
             >
               Filter
-              <span className="ml-2">▽</span>
+              <span className="ml-2 px-6">▽</span>
             </button>
             {showFilters && (
-              <div className="absolute bg-white border-slate-300 rounded-md p-2 w-full flex-col">
-                <div className="flex flex-col items-start p-5">
+              <div className="absolute bg-white border-slate-300 rounded-md p-2  w-20vw flex flex-col ">
+                <div className="flex flex-col items-start p-5 w-full">
                   <p>Status</p>
                   <label>
                     <input

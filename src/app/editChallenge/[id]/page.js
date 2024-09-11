@@ -61,20 +61,21 @@ const EditChallenge = ({ params }) => {
     e.preventDefault();
     setError(null);
 
-    const form = new FormData();
-    form.append("name", formData.name);
-    form.append("description", formData.description);
-    form.append("StartDate", formData.StartDate);
-    form.append("EndDate", formData.EndDate);
-    form.append("level", formData.level);
-    if (formData.image) {
-      form.append("image", formData.image);
-    }
+    const data = {
+      name: formData.name,
+      description: formData.description,
+      StartDate: formData.StartDate,
+      EndDate: formData.EndDate,
+      level: formData.level,
+    };
 
     try {
       const response = await fetch(`/api/challenge/${id}`, {
         method: "PUT",
-        body: form,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
