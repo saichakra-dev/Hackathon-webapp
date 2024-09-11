@@ -1,8 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const ChallengeForm = () => {
+const EditChallenge = ({ params }) => {
+  const { id } = params;
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -11,8 +13,42 @@ const ChallengeForm = () => {
     level: "",
     image: null,
   });
+  const [error, setError] = useState(null);
 
-  const router = useRouter();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`/api/challenge/${id}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        if (result.success) {
+          setFormData({
+            name: result.challenge.name,
+            description: result.challenge.description,
+            StartDate: new Date(result.challenge.StartDate)
+              .toISOString()
+              .split("T")[0],
+            EndDate: new Date(result.challenge.EndDate)
+              .toISOString()
+              .split("T")[0],
+            level: result.challenge.level,
+            image: null,
+          });
+        } else {
+          console.error("Failed to fetch challenge data");
+          setError("Failed to fetch challenge data");
+        }
+      } catch (error) {
+        console.error("Error fetching challenge data", error);
+        setError("Error fetching challenge data");
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData({
@@ -23,39 +59,48 @@ const ChallengeForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
     const form = new FormData();
     form.append("name", formData.name);
     form.append("description", formData.description);
     form.append("StartDate", formData.StartDate);
     form.append("EndDate", formData.EndDate);
     form.append("level", formData.level);
-    form.append("image", formData.image);
+    if (formData.image) {
+      form.append("image", formData.image);
+    }
 
     try {
-      let result = await fetch("/api/challenge", {
-        method: "POST",
+      const response = await fetch(`/api/challenge/${id}`, {
+        method: "PUT",
         body: form,
       });
-      result = await result.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
       if (result.success) {
-        alert("Challenge Added Successfully");
-        router.push("/");
+        alert("Challenge Updated Successfully");
+        router.push(`/`);
       } else {
-        alert("Failed to Add Challenge");
+        alert("Failed to Update Challenge");
       }
     } catch (error) {
-      console.error("Error submitting form", error);
+      console.error("Error updating challenge", error);
+      setError("Error updating challenge");
     }
   };
 
   return (
     <>
-      <div className="min-h-screen w-full flex flex-col  px-20 justify-start">
+      <div className="min-h-screen w-full flex flex-col px-20 justify-start">
         <form
           onSubmit={handleSubmit}
           encType="multipart/form-data"
           className="w-full max-w-lg p-5"
         >
+          {error && <div className="text-red-600 mb-4">{error}</div>}
           <div className="flex flex-col text-xl">
             <label className="pt-5 pb-2">Challenge Name</label>
             <input
@@ -64,6 +109,7 @@ const ChallengeForm = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              required
             />
             <label className="pt-5 pb-2">Start Date</label>
             <input
@@ -72,6 +118,7 @@ const ChallengeForm = () => {
               name="StartDate"
               value={formData.StartDate}
               onChange={handleChange}
+              required
             />
             <label className="pt-5 pb-2">End Date</label>
             <input
@@ -80,6 +127,7 @@ const ChallengeForm = () => {
               name="EndDate"
               value={formData.EndDate}
               onChange={handleChange}
+              required
             />
             <label className="pt-5 pb-2">Description</label>
             <textarea
@@ -87,6 +135,7 @@ const ChallengeForm = () => {
               name="description"
               value={formData.description}
               onChange={handleChange}
+              required
             />
             <label className="pt-5 pb-2">Image</label>
             <input
@@ -101,6 +150,7 @@ const ChallengeForm = () => {
               name="level"
               value={formData.level}
               onChange={handleChange}
+              required
             >
               <option value="">Select Level</option>
               <option value="Easy">Easy</option>
@@ -109,9 +159,9 @@ const ChallengeForm = () => {
             </select>
             <button
               type="submit"
-              className="mt-10 bg-green-600 font-bold  text-white p-2 rounded-xl text-lg w-1/2 "
+              className="mt-10 bg-green-600 font-bold text-white p-2 rounded-xl text-lg w-1/2"
             >
-              Create Challenge
+              Update Challenge
             </button>
           </div>
         </form>
@@ -120,4 +170,4 @@ const ChallengeForm = () => {
   );
 };
 
-export default ChallengeForm;
+export default EditChallenge;

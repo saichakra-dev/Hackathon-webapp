@@ -1,90 +1,112 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 const Page = () => {
   const [showFilters, setShowFilters] = useState(false);
+  const [challenges, setChallenges] = useState([]);
+  const [filteredChallenges, setFilteredChallenges] = useState([]);
+  const [filterStatus, setFilterStatus] = useState([]);
+  const [filterLevel, setFilterLevel] = useState([]);
 
-  // const [challenges, setChallenges] = useState([]);
-
-  // const [filter, setFilter] = useState("");
-
-  // useEffect(() => {
-  //   const fetchChallenges = async () => {
-  //     try {
-  //       const response = await axios.get("/api/challenge");
-  //       setChallenges(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching challenges:", error);
-  //     }
-  //   };
-  //   fetchChallenges();
-  // }, []);
-
-  const challenges = [
-    {
-      id: 1,
-      name: "Data Science BootCamp-Graded Datathon",
-      description: "Description of Challenge 1",
-      StartDate: "2024-09-01",
-      EndDate: "2025-06-30",
-      level: "Easy",
-      image: "/assets/cardimage/Group 1000002466.png",
-    },
-    {
-      id: 2,
-      name: "Data Science BootCamp-Graded Datathon",
-      description: "Description of Challenge 1",
-      StartDate: "2025-06-01",
-      EndDate: "2025-06-30",
-      level: "Easy",
-      image: "/assets/cardimage/Group 1000002466.png",
-    },
-    {
-      id: 3,
-      name: "Data Science BootCamp-Graded Datathon",
-      description: "Description of Challenge 1",
-      StartDate: "2025-06-01",
-      EndDate: "2025-06-30",
-      level: "Easy",
-      image: "/assets/cardimage/Group 1000002466.png",
-    },
-    {
-      id: 4,
-      name: "Data Science BootCamp-Graded Datathon",
-      description: "Description of Challenge 1",
-      StartDate: "2025-06-01",
-      EndDate: "2025-06-30",
-      level: "Easy",
-      image: "/assets/cardimage/Group 1000002466.png",
-    },
-    {
-      id: 5,
-      name: "Data Science BootCamp-Graded Datathon",
-      description: "Description of Challenge 1",
-      StartDate: "2025-06-01",
-      EndDate: "2025-06-30",
-      level: "Easy",
-      image: "/assets/cardimage/Group 1000002466.png",
-    },
-    {
-      id: 6,
-      name: "Data Science BootCamp-Graded Datathon",
-      description: "Description of Challenge 1",
-      StartDate: "2025-06-01",
-      EndDate: "2025-06-30",
-      level: "Easy",
-      image: "/assets/cardimage/Group 1000002466.png",
-    },
-  ];
+  useEffect(() => {
+    const fetchChallenges = async () => {
+      try {
+        const response = await axios.get("/api/challenge");
+        setChallenges(response.data.challenges);
+        setFilteredChallenges(response.data.challenges);
+      } catch (error) {
+        console.error("Error fetching challenges:", error);
+      }
+    };
+    fetchChallenges();
+  }, []);
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
+  const handleFilterStatus = (e) => {
+    const { value, checked } = e.target;
+    setFilterStatus((prev) =>
+      checked ? [...prev, value] : prev.filter((status) => status !== value)
+    );
+  };
+
+  const handleFilterLevel = (e) => {
+    const { value, checked } = e.target;
+    setFilterLevel((prev) =>
+      checked ? [...prev, value] : prev.filter((level) => level !== value)
+    );
+  };
+
+  useEffect(() => {
+    let filtered = challenges;
+
+    // Apply status filter
+    if (filterStatus.length > 0) {
+      filtered = filtered.filter((challenge) => {
+        const now = new Date().getTime();
+        const isActive =
+          now >= new Date(challenge.StartDate).getTime() &&
+          now <= new Date(challenge.EndDate).getTime();
+        const isUpcoming = now < new Date(challenge.StartDate).getTime();
+        const isPast = now > new Date(challenge.EndDate).getTime();
+
+        return (
+          (filterStatus.includes("Active") && isActive) ||
+          (filterStatus.includes("Upcoming") && isUpcoming) ||
+          (filterStatus.includes("Past") && isPast)
+        );
+      });
+    }
+
+    // Apply level filter
+    if (filterLevel.length > 0) {
+      filtered = filtered.filter((challenge) =>
+        filterLevel.includes(challenge.level)
+      );
+    }
+
+    setFilteredChallenges(filtered);
+  }, [filterStatus, filterLevel, challenges]);
+
+  // Timer logic for countdown
+  const calculateTimeLeft = (startDate, endDate) => {
+    const now = new Date().getTime();
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+
+    if (now < start) {
+      const difference = start - now;
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      return { status: "Upcoming", days, hours, minutes };
+    } else if (now >= start && now <= end) {
+      const difference = end - now;
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      return { status: "Active", days, hours, minutes };
+    } else {
+      return { status: "Past" };
+    }
+  };
+
+  setInterval(() => {
+    calculateTimeLeft();
+  }, 100000);
+
   return (
     <div>
-      <div className="w-full flex bg-cyan-950 h-60vh ">
+      {/* Banner Section */}
+      <div className="w-full flex bg-cyan-950 h-60vh">
         <div className="w-2/3">
           <div className="ml-20 m-20 mr-10">
             <div className="text-6xl text-white font-bold flex">
@@ -107,7 +129,7 @@ const Page = () => {
           </div>
         </div>
         <div className="w-1/3 m-20">
-          <img className="" src={"./assets/icons/PicsArt_04-14-04.42 1.svg"} />
+          <img src={"./assets/icons/PicsArt_04-14-04.42 1.svg"} />
         </div>
       </div>
       <div className="border-l-white-200 border-t-1.5 h-0.2 "></div>
@@ -215,7 +237,7 @@ const Page = () => {
         <div className="flex gap-5 p-5 justify-center items-center">
           <div className="relative w-2/3">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
-              <div>🔎</div>
+              🔎
             </span>
             <input
               type="text"
@@ -223,45 +245,76 @@ const Page = () => {
               placeholder="Search"
             />
           </div>
-          <div className={`relative ${showFilters ? "w-1/6" : "w-auto"}`}>
+          <div className="relative">
             <button
-              className={`w-full  border-collapse border-2 border-slate-300 rounded-lg p-5 bg-white flex items-center justify-between ${
-                showFilters ? "rounded-lg" : ""
-              }`}
+              className="w-full border-collapse border-2 border-slate-300 rounded-lg p-5 bg-white flex items-center justify-between"
               onClick={toggleFilters}
             >
               Filter
-              <span className="ml-2">
-                <div>▽</div>
-              </span>
+              <span className="ml-2">▽</span>
             </button>
             {showFilters && (
               <div className="absolute bg-white border-slate-300 rounded-md p-2 w-full flex-col">
                 <div className="flex flex-col items-start p-5">
                   <p>Status</p>
                   <label>
-                    <input type="checkbox" value="All" /> All
+                    <input
+                      type="checkbox"
+                      value="All"
+                      onChange={handleFilterStatus}
+                    />{" "}
+                    All
                   </label>
                   <label>
-                    <input type="checkbox" value="Active" /> Active
+                    <input
+                      type="checkbox"
+                      value="Active"
+                      onChange={handleFilterStatus}
+                    />{" "}
+                    Active
                   </label>
                   <label>
-                    <input type="checkbox" value="Upcoming" /> Upcoming
+                    <input
+                      type="checkbox"
+                      value="Upcoming"
+                      onChange={handleFilterStatus}
+                    />{" "}
+                    Upcoming
                   </label>
                   <label>
-                    <input type="checkbox" value="Past" /> Past
+                    <input
+                      type="checkbox"
+                      value="Past"
+                      onChange={handleFilterStatus}
+                    />{" "}
+                    Past
                   </label>
                 </div>
-                <div className="flex flex-col items-start p-5 m-5">
+                <div className="flex flex-col items-start p-5">
                   <p>Level</p>
                   <label>
-                    <input type="checkbox" value="Easy" /> Easy
+                    <input
+                      type="checkbox"
+                      value="Easy"
+                      onChange={handleFilterLevel}
+                    />{" "}
+                    Easy
                   </label>
                   <label>
-                    <input type="checkbox" value="Medium" /> Medium
+                    <input
+                      type="checkbox"
+                      value="Medium"
+                      onChange={handleFilterLevel}
+                    />{" "}
+                    Medium
                   </label>
                   <label>
-                    <input type="checkbox" value="Hard" /> Hard
+                    <input
+                      type="checkbox"
+                      value="Hard"
+                      onChange={handleFilterLevel}
+                    />{" "}
+                    Hard
                   </label>
                 </div>
               </div>
@@ -271,31 +324,67 @@ const Page = () => {
       </div>
 
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-10 p-20 bg-cyan-950">
-        {challenges.map((challenge, index) => {
+        {filteredChallenges.map((challenge, index) => {
+          const timeLeft = calculateTimeLeft(
+            challenge.StartDate,
+            challenge.EndDate
+          );
+
           return (
             <div
               key={index}
               className="flex flex-col items-center justify-center rounded-3xl bg-white"
             >
-              <img className="w-full" src={challenge.image} />
-              <div className="p-2 bg-orange-100 text-green-950 rounded-md pl-5 pr-5 m-3 text-sm">
-                {new Date().getTime() >=
-                  new Date(challenge.StartDate).getTime() &&
-                new Date().getTime() <= new Date(challenge.EndDate).getTime()
-                  ? "Active"
-                  : "Upcoming"}
-              </div>
+              <img
+                className="w-full rounded-t-2xl"
+                src={challenge.image}
+                alt={challenge.name}
+              />
+
+              {timeLeft.status === "Active" ? (
+                <div className="p-2 bg-green-200 text-green-950 rounded-md pl-5 pr-5 m-3 text-sm">
+                  Active
+                </div>
+              ) : timeLeft.status === "Upcoming" ? (
+                <div className="p-2 bg-orange-100 text-green-950 rounded-md pl-5 pr-5 m-3 text-sm">
+                  Upcoming
+                </div>
+              ) : (
+                <div className="p-2 bg-orange-100 text-green-950 rounded-md pl-5 pr-5 m-3 text-sm">
+                  Past
+                </div>
+              )}
 
               <div className="text-xl font-bold p-1 text-center flex-wrap w-3/4">
                 {challenge.name}
               </div>
-              <div className="text-0.5 font-bold text-slate-800 pt-5">
-                Starts in
-              </div>
-              <div className="text-xl font-bold p-2">{challenge.StartDate}</div>
-              <div className="text-0.2">Days : Hours : Mins</div>
+
+              {timeLeft.status === "Upcoming" ? (
+                <div>
+                  <div className="text-0.5 font-bold text-slate- pt-5 text-center flex justify-center items-center">
+                    Starts in
+                  </div>
+                  <div className="text-xl font-bold p-2 text-center">{`${timeLeft.days} : ${timeLeft.hours} : ${timeLeft.minutes}`}</div>
+                  <div className="text-xs text-slate-800">
+                    Days : Hours : Minutes
+                  </div>
+                </div>
+              ) : timeLeft.status === "Active" ? (
+                <div>
+                  <div className="text-0.5 font-bold text-slate- pt-5 text-center flex justify-center items-center">
+                    Ends in
+                  </div>
+                  <div className="text-xl font-bold p-2 text-center">{`${timeLeft.days} : ${timeLeft.hours} : ${timeLeft.minutes}`}</div>
+                  <div className="text-xs text-slate-800">
+                    Days : Hours : Minutes
+                  </div>
+                </div>
+              ) : (
+                <div className="text-xl font-bold p-2">Challenge has Ended</div>
+              )}
+
               <div className="flex gap-5 p-5 justify-center items-center">
-                <Link href={`/participateChallenge/${index}`}>
+                <Link href={`/participateChallenge/${challenge._id}`}>
                   <button className="p-3 text-white bg-green-600 rounded-2xl pl-10 pr-10 font-bold">
                     Participate Now
                   </button>

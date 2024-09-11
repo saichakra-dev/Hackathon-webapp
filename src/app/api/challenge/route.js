@@ -2,35 +2,41 @@ import { NextResponse } from "next/server";
 import DB from "@/app/utils/config/DB.js";
 import challengeModel from "@/app/utils/models/challengeModel";
 import path from "path";
-import { promises as fs } from "fs"; // Import the promises API
+import { promises as fs } from "fs";
 
 // Connect to the database
 const ConnectDb = async () => {
-  await DB();
+  if (!DB.isConnected) {
+    await DB();
+  }
 };
-ConnectDb();
 
 // GET all challenges
 export async function GET() {
   await ConnectDb();
-  const challenges = await challengeModel.find({});
-  return NextResponse.json(challenges, { status: 200 });
+  try {
+    const challenges = await challengeModel.find({});
+    return NextResponse.json({ success: true, challenges }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: "Error fetching challenges" },
+      { status: 500 }
+    );
+  }
 }
 
 // POST a new challenge
 export async function POST(request) {
   await ConnectDb();
-
   const data = await request.formData();
   const image = data.get("image");
   const name = data.get("name");
   const description = data.get("description");
-  const StartData = data.get("StartData");
+  const StartDate = data.get("StartDate");
   const EndDate = data.get("EndDate");
   const level = data.get("level");
 
-  // Validate required fields
-  if (!name || !description || !StartData || !EndDate || !level) {
+  if (!name || !description || !StartDate || !EndDate || !level) {
     return NextResponse.json({
       success: false,
       error: "All fields are required",
@@ -43,26 +49,27 @@ export async function POST(request) {
   const uploadsDir = path.join(process.cwd(), "public", "uploads");
 
   try {
-    // Ensure the uploads directory exists
     await fs.mkdir(uploadsDir, { recursive: true });
-    // Write the file
     await fs.writeFile(imagePath, buffer);
+
     const challenge = new challengeModel({
-      name: name,
+      name,
       image: `/uploads/${image.name}`,
-      description: description,
-      StartData: StartData,
-      EndDate: EndDate,
-      level: level,
+      description,
+      StartDate,
+      EndDate,
+      level,
     });
     await challenge.save();
-    console.log("Challenge saved successfully");
+
     return NextResponse.json({
-      response: "Successfully uploaded",
       success: true,
+      response: "Successfully uploaded",
     });
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({ success: false });
+    return NextResponse.json({
+      success: false,
+      error: "Error uploading challenge",
+    });
   }
 }

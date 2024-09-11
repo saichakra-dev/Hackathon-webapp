@@ -14,7 +14,7 @@ const ChallengeSchema = new mongoose.Schema(
     image: {
       type: String,
     },
-    StartData: {
+    StartDate: {
       type: Date,
       required: true,
     },
@@ -32,6 +32,7 @@ const ChallengeSchema = new mongoose.Schema(
   }
 );
 
-const challengeModel = mongoose.model("challenge", ChallengeSchema);
+const challengeModel =
+  mongoose.models.challenge || mongoose.model("challenge", ChallengeSchema);
 
 export default challengeModel;
