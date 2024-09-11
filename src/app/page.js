@@ -103,7 +103,15 @@ const Page = () => {
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       return { status: "Active", days, hours, minutes };
     } else {
-      return { status: "Past" };
+      const endDateFormatted = new Date(endDate).toLocaleString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "2-digit",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+      return { status: "Past", endDateFormatted };
     }
   };
 
@@ -360,7 +368,7 @@ const Page = () => {
                   Upcoming
                 </div>
               ) : (
-                <div className="p-2 bg-orange-100 text-green-950 rounded-md pl-5 pr-5 m-3 text-sm">
+                <div className="p-5 bg-orange-100 text-green-950 rounded-md pl-5 pr-5 m-3 text-sm">
                   Past
                 </div>
               )}
@@ -390,7 +398,14 @@ const Page = () => {
                   </div>
                 </div>
               ) : (
-                <div className="text-xl font-bold p-2">Challenge has Ended</div>
+                <>
+                  <div className="text-0.5 font-bold text-slate- pt-5 text-center flex justify-center items-center">
+                    Ended on
+                  </div>
+                  <div className="text-xl font-bold p-2 text-center">
+                    {timeLeft.endDateFormatted}
+                  </div>
+                </>
               )}
 
               <div className="flex gap-5 p-5 justify-center items-center">
