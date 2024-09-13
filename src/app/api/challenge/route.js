@@ -18,6 +18,7 @@ export async function GET() {
     const challenges = await challengeModel.find({});
     return NextResponse.json({ success: true, challenges }, { status: 200 });
   } catch (error) {
+    console.error("Error fetching challenges:", error);
     return NextResponse.json(
       { success: false, error: "Error fetching challenges" },
       { status: 500 }
@@ -54,7 +55,7 @@ export async function POST(request) {
 
     const challenge = new challengeModel({
       name,
-      image: `/uploads/${image.name}`,
+      image: `/uploads/${image.name}`, // Fixed syntax error here
       description,
       StartDate,
       EndDate,
@@ -67,6 +68,7 @@ export async function POST(request) {
       response: "Successfully uploaded",
     });
   } catch (error) {
+    console.error("Error uploading challenge:", error);
     return NextResponse.json({
       success: false,
       error: "Error uploading challenge",

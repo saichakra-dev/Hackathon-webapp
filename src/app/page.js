@@ -354,7 +354,7 @@ const Page = () => {
               className="flex flex-col items-center justify-center rounded-3xl bg-white"
             >
               <img
-                className="w-full rounded-t-2xl"
+                className="w-full rounded-t-2xl h-60 "
                 src={challenge.image}
                 alt={challenge.name}
               />
@@ -368,18 +368,18 @@ const Page = () => {
                   Upcoming
                 </div>
               ) : (
-                <div className="p-5 bg-orange-100 text-green-950 rounded-md pl-5 pr-5 m-3 text-sm">
+                <div className="p-2 bg-orange-100 text-green-950 rounded-md pl-5 pr-5 m-3 text-sm">
                   Past
                 </div>
               )}
 
-              <div className="text-xl font-bold p-1 text-center flex-wrap w-3/4">
+              <div className="text-xl font-bold text-center flex-wrap w-3/4">
                 {challenge.name}
               </div>
 
               {timeLeft.status === "Upcoming" ? (
                 <div>
-                  <div className="text-0.5 font-bold text-slate- pt-5 text-center flex justify-center items-center">
+                  <div className="text-0.5 font-bold  pt-5 text-center flex justify-center items-center">
                     Starts in
                   </div>
                   <div className="text-xl font-bold p-2 text-center">{`${timeLeft.days} : ${timeLeft.hours} : ${timeLeft.minutes}`}</div>
@@ -389,7 +389,7 @@ const Page = () => {
                 </div>
               ) : timeLeft.status === "Active" ? (
                 <div>
-                  <div className="text-0.5 font-bold text-slate- pt-5 text-center flex justify-center items-center">
+                  <div className="text-0.5 font-bold  pt-5 text-center flex justify-center items-center">
                     Ends in
                   </div>
                   <div className="text-xl font-bold p-2 text-center">{`${timeLeft.days} : ${timeLeft.hours} : ${timeLeft.minutes}`}</div>
@@ -399,11 +399,14 @@ const Page = () => {
                 </div>
               ) : (
                 <>
-                  <div className="text-0.5 font-bold text-slate- pt-5 text-center flex justify-center items-center">
+                  <div className="text-0.5 font-bold  pt-5 text-center flex justify-center items-center">
                     Ended on
                   </div>
                   <div className="text-xl font-bold p-2 text-center">
                     {timeLeft.endDateFormatted}
+                  </div>
+                  <div className="text-xs text-slate-800">
+                    Days : Hours : Minutes
                   </div>
                 </>
               )}
